@@ -14,13 +14,6 @@ from ultralytics import YOLO
 class YOLOv8:
     """YOLOv8目标检测模型类，用于处理推理和可视化操作。"""
     def __init__(self, onnx_model, confidence_thres, iou_thres):
-        """
-        初始化YOLOv8类的实例。
-        参数:
-            onnx_model: ONNX模型的路径。
-            confidence_thres: 过滤检测的置信度阈值。
-            iou_thres: 非极大抑制的IoU（交并比）阈值。
-        """
         self.input_height = None
         self.input_width = None
         self.img = None
@@ -30,58 +23,38 @@ class YOLOv8:
         self.confidence_thres = confidence_thres
         self.iou_thres = iou_thres
  
-        # 从COCO数据集的配置文件加载类别名称
         self.classes ={0: 'coal', 1: 'stone'}
-        # 字典存储类别名称
-        # print(self.classes)
-        # {0: 'person', 1: 'bicycle', 2: 'car', 3: 'motorcycle', 4: 'airplane'...}
  
-        # 为类别生成颜色调色板
         self.color_palette = np.random.uniform(0, 255, size=(len(self.classes), 3))
  
-        # 初始化ONNX会话
         self.initialize_session(self.onnx_model)
  
     def draw_detections(self, img, box, score, class_id):
         """
         根据检测到的对象在输入图像上绘制边界框和标签。
-        参数:
-            img: 要绘制检测的输入图像。
-            box: 检测到的边界框。
-            score: 对应的检测得分。
-            class_id: 检测到的对象的类别ID。
-        返回:
-            None
         """
  
-        # 提取边界框的坐标
         x1, y1, w, h = box
- 
-        # 获取类别ID对应的颜色
+
         if class_id == 0:
             color = (0,0,255)
         else:
             color = (0,255,0)
  
-        # 在图像上绘制边界框
         cv2.rectangle(img, (int(x1), int(y1)), (int(x1 + w), int(y1 + h)), color, 2)
  
-        # 创建包含类名和得分的标签文本
         label = f"{self.classes[class_id]}: {score:.2f}"
  
         # 计算标签文本的尺寸
         (label_width, label_height), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
  
-        # 计算标签文本的位置
         label_x = x1
         label_y = y1 - 10 if y1 - 10 > label_height else y1 + 10
  
-        # 绘制填充的矩形作为标签文本的背景
         # cv2.rectangle(
         #     img, (label_x, label_y - label_height), (label_x + label_width, label_y + label_height), color, cv2.FILLED
         # )
  
-        # 在图像上绘制标签文本
         cv2.putText(img, label, (label_x, label_y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
  
     def preprocess(self,frame):
@@ -257,9 +230,9 @@ def calculate_r_value(image_path):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model", type=str, default="/home/jykj/ultralytics/runs/coal/weights/best.onnx", help="ONNX模型路径")
+    parser.add_argument("--model", type=str, default=".//best.onnx", help="ONNX模型路径")
     parser.add_argument("--source", type=str, default="/home/jykj/coal_detect/data/coal1/", help="视频文件路径或摄像头索引")
-    parser.add_argument("--result_path", type=str, default="/home/jykj/coal_detect/data/coal1/", help="视频文件路径或摄像头索引")
+    parser.add_argument("--result_path", type=str, default="./coal1", help="视频文件路径或摄像头索引")
     parser.add_argument("--conf-thres", type=float, default=0.3, help="置信度阈值")
     parser.add_argument("--iou-thres", type=float, default=0.5, help="IoU阈值")
     args = parser.parse_args()
